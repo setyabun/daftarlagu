@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Daftar Lagu Misa — Paduan Suara</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <!-- Top Bar (Disembunyikan saat cetak) -->
+    <header class="topbar no-print">
+      <div class="brand">
+        <span class="brand-cross" aria-hidden="true">✝</span>
+        <div>
+          <h1>Tata Lagu Misa</h1>
+          <p class="brand-sub">Form Liturgi, Edit Riwayat &amp; Cetak</p>
+        </div>
+      </div>
+
+      <nav class="nav-tabs" aria-label="Menu Utama">
+        <button type="button" class="tab-btn active" data-view="formView">Isi / Edit Lagu</button>
+        <button type="button" class="tab-btn" data-view="historyView">Riwayat (Edit)</button>
+      </nav>
+    </header>
+
+    <div id="statusBanner" class="status-banner no-print" hidden></div>
+
+    <!-- VIEW 1: FORM + PRATINJAU CETAK -->
+    <main id="formView" class="view active">
+      <section class="editor-panel no-print">
+        <form id="misaForm" autocomplete="off">
+          <input type="hidden" id="recordId" value="" />
+
+          <!-- Accordion 1: Identitas & Tipe Misa -->
+          <div class="accordion open">
+            <button type="button" class="accordion-trigger" aria-expanded="true">
+              <span>1. Identitas Jadwal &amp; Tipe Misa</span>
+              <span class="chevron">▾</span>
+            </button>
+            <div class="accordion-body">
+              <div class="grid-2">
+                <div class="field">
+                  <label for="paduanSuara">Paduan Suara</label>
+                  <select id="paduanSuara" required>
+                    <option value="St.Antonius d/Padua">St.Antonius d/Padua</option>
+                    <option value="St.Theresia d/Kanak-Kanak Yesus">St.Theresia d/Kanak-Kanak Yesus</option>
+                  </select>
+                </div>
+
+                <div class="field">
+                  <label for="tahunLiturgis">Tahun Liturgi</label>
+                  <select id="tahunLiturgis" required>
+                    <option value="A">Tahun A</option>
+                    <option value="B">Tahun B</option>
+                    <option value="C">Tahun C</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="grid-2">
+                <div class="field">
+                  <label for="tanggalMisa">Tanggal Misa</label>
+                  <input type="date" id="tanggalMisa" />
+                </div>
+
+                <div class="field">
+                  <label for="jamMisa">Jam Misa</label>
+                  <input type="text" id="jamMisa" placeholder="Contoh: 08.30 atau 11.00" />
+                </div>
+              </div>
+
+              <div class="field">
+                <label for="hariMinggu">Hari Minggu / Perayaan <span class="hint">(maks. 50 karakter)</span></label>
+                <input type="text" id="hariMinggu" maxlength="50" placeholder="Contoh: Hari Minggu Biasa XXXIV" />
+                <small class="char-counter"><span id="hariMingguCount">0</span>/50</small>
+              </div>
+
+              <div class="field">
+                <span class="field-label">Tipe Misa (boleh lebih dari satu)</span>
+                <div class="chip-group">
+                  <label class="chip-check">
+                    <input type="checkbox" id="tipeBiasa" checked />
+                    <span>Misa Biasa</span>
+                  </label>
+                  <label class="chip-check">
+                    <input type="checkbox" id="tipeJumatPertama" />
+                    <span>Misa Jumat Pertama</span>
+                  </label>
+                  <label class="chip-check">
+                    <input type="checkbox" id="tipeRosario" />
+                    <span>Misa Rosario</span>
+                  </label>
+                  <label class="chip-check">
+                    <input type="checkbox" id="tipeJam11" />
+                    <span>Misa Jam 11.00 (Lagu Anak)</span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="field">
+                <label class="toggle-row">
+                  <input type="checkbox" id="tanpaKemuliaan" />
+                  <span>Masa Adven / Prapaskah (tanpa lagu Kemuliaan)</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Accordion 2: Preset Ordinarium & Lagu Utama -->
+          <div class="accordion open">
+            <button type="button" class="accordion-trigger" aria-expanded="true">
+              <span>2. Ordinarium &amp; Lagu Liturgi Utama</span>
+              <span class="chevron">▾</span>
+            </button>
+            <div class="accordion-body">
+              <div class="preset-box">
+                <div class="field">
+                  <label for="ordinariumPreset">Preset Judul Ordinarium</label>
+                  <select id="ordinariumPreset">
+                    <option value="">— Pilih Preset Ordinarium (Opsional) —</option>
+                    <option value="Misa Kita 2">Misa Kita 2 (Tuhan, Kemuliaan, Kudus, Anak Domba Allah)</option>
+                    <option value="Misa Kita 1">Misa Kita 1</option>
+                    <option value="Misa Kita 3">Misa Kita 3</option>
+                    <option value="Misa Kita 4">Misa Kita 4</option>
+                    <option value="Misa Syukur">Misa Syukur</option>
+                    <option value="Misa Dolo-Dolo">Misa Dolo-Dolo</option>
+                  </select>
+                </div>
+                <p class="helper-text">Memilih preset akan mengisi judul <strong>Tuhan Kasihanilah kami</strong>, <strong>Kemuliaan</strong>, <strong>Kudus</strong>, dan <strong>Anak Domba Allah</strong> secara seragam, lalu tetap bisa Anda ubah satu per satu.</p>
+              </div>
+
+              <div id="songInputsContainer" class="song-form-list"></div>
+            </div>
+          </div>
+
+          <!-- Accordion 3: Lagu Tambahan Khusus Tipe Misa -->
+          <div class="accordion">
+            <button type="button" class="accordion-trigger" aria-expanded="false">
+              <span>3. Tambahan Jumat Pertama, Rosario &amp; Lagu Anak</span>
+              <span class="chevron">▾</span>
+            </button>
+            <div class="accordion-body" id="extraSongInputsContainer"></div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="form-actions">
+            <button type="submit" id="saveBtn" class="btn btn-primary">Simpan ke Google Sheet</button>
+            <button type="button" id="printBtn" class="btn btn-secondary">Cetak / Simpan PDF</button>
+            <button type="button" id="resetBtn" class="btn btn-ghost">Form Baru</button>
+          </div>
+        </form>
+      </section>
+
+      <!-- LEMBAR CETAK (PRINTABLE SHEET) -->
+      <section class="preview-panel">
+        <div class="print-toolbar no-print">
+          <span class="preview-label">Pratinjau Lembar Cetak</span>
+        </div>
+
+        <article id="printableSheet" class="print-sheet">
+          <div class="sheet-header">
+            <div class="sheet-row">
+              <span><strong>Paduan Suara:</strong> <span id="outPaduanSuara">St.Antonius d/Padua</span></span>
+              <span><strong>Tahun:</strong> <span id="outTahun">A</span></span>
+            </div>
+            <div class="sheet-row">
+              <span><strong>Hari Minggu :</strong> <span id="outHariMinggu">-</span></span>
+              <span id="outJadwalMeta" class="sheet-meta"></span>
+            </div>
+            <div id="outTipeBadge" class="sheet-tipe"></div>
+          </div>
+
+          <table class="liturgy-table">
+            <thead>
+              <tr>
+                <th class="col-bagian">Lagu</th>
+                <th class="col-nomor">Nomor</th>
+                <th class="col-judul">Judul</th>
+              </tr>
+            </thead>
+            <tbody id="printTableBody"></tbody>
+          </table>
+        </article>
+      </section>
+    </main>
+
+    <!-- VIEW 2: RIWAYAT & EDIT -->
+    <main id="historyView" class="view no-print">
+      <div class="history-card">
+        <div class="history-header">
+          <div>
+            <h2>Riwayat Daftar Lagu</h2>
+            <p class="muted">Pilih jadwal misa untuk mengedit di form atau langsung mencetak ulang.</p>
+          </div>
+          <button type="button" id="refreshHistoryBtn" class="btn btn-secondary btn-sm">Muat Ulang</button>
+        </div>
+
+        <div class="history-filter">
+          <input type="search" id="searchHistory" placeholder="Cari hari minggu, paduan suara, tipe misa, atau tanggal..." />
+        </div>
+
+        <div id="historyList" class="history-list">
+          <p class="muted">Klik tab Riwayat untuk memuat data dari Google Sheet.</p>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

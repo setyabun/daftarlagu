@@ -1,0 +1,633 @@
+:root {
+  --bg: #f6f4ef;
+  --surface: #ffffff;
+  --surface-soft: #fbf9f5;
+  --ink: #1f2421;
+  --muted: #5f6760;
+  --line: #dfd9ce;
+  --accent: #5a2b36;       /* Burgundy liturgi yang tenang */
+  --accent-hover: #441f28;
+  --accent-soft: #f4ecee;
+  --gold: #8c6a2b;
+  --success-bg: #edf6f0;
+  --success-ink: #1f5c35;
+  --error-bg: #fdeeee;
+  --error-ink: #8f2424;
+  --radius: 12px;
+  --shadow: 0 6px 24px rgba(31, 36, 33, 0.06);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+}
+
+.app-shell {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+/* Header */
+.topbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 14px 18px;
+  box-shadow: var(--shadow);
+  margin-bottom: 16px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brand-cross {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  display: grid;
+  place-items: center;
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.topbar h1 {
+  margin: 0;
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.65rem;
+  font-weight: 700;
+  color: var(--accent);
+  line-height: 1.1;
+}
+
+.brand-sub {
+  margin: 2px 0 0;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.nav-tabs {
+  display: flex;
+  gap: 8px;
+}
+
+.tab-btn {
+  border: 1px solid var(--line);
+  background: var(--surface-soft);
+  color: var(--ink);
+  padding: 9px 14px;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.tab-btn.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+/* Status Banner */
+.status-banner {
+  padding: 12px 16px;
+  border-radius: 10px;
+  margin-bottom: 14px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  border: 1px solid transparent;
+}
+
+.status-banner.info {
+  background: var(--accent-soft);
+  border-color: #decad0;
+  color: var(--accent);
+}
+
+.status-banner.success {
+  background: var(--success-bg);
+  border-color: #bfe2ca;
+  color: var(--success-ink);
+}
+
+.status-banner.error {
+  background: var(--error-bg);
+  border-color: #f3c2c2;
+  color: var(--error-ink);
+}
+
+/* Views & Main Grid */
+.view {
+  display: none;
+}
+
+.view.active {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 18px;
+}
+
+@media (min-width: 980px) {
+  #formView.active {
+    grid-template-columns: minmax(420px, 1.05fr) minmax(440px, 0.95fr);
+    align-items: start;
+  }
+}
+
+/* Accordion */
+.accordion {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  margin-bottom: 12px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.accordion-trigger {
+  width: 100%;
+  background: var(--surface);
+  border: 0;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--ink);
+  cursor: pointer;
+  text-align: left;
+}
+
+.accordion-trigger:hover {
+  background: var(--surface-soft);
+}
+
+.chevron {
+  transition: transform 0.2s ease;
+  color: var(--accent);
+}
+
+.accordion:not(.open) .chevron {
+  transform: rotate(-90deg);
+}
+
+.accordion-body {
+  display: none;
+  padding: 0 16px 16px;
+  border-top: 1px solid var(--line);
+  padding-top: 14px;
+}
+
+.accordion.open .accordion-body {
+  display: block;
+}
+
+/* Form Controls */
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+@media (min-width: 560px) {
+  .grid-2 {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.field {
+  margin-bottom: 12px;
+}
+
+.field:last-child {
+  margin-bottom: 0;
+}
+
+label,
+.field-label {
+  display: block;
+  font-size: 0.84rem;
+  font-weight: 600;
+  margin-bottom: 5px;
+  color: var(--ink);
+}
+
+.hint {
+  font-weight: 400;
+  color: var(--muted);
+}
+
+input[type="text"],
+input[type="date"],
+input[type="search"],
+select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.92rem;
+  background: #fff;
+  color: var(--ink);
+}
+
+input:focus,
+select:focus {
+  outline: 2px solid rgba(90, 43, 54, 0.2);
+  border-color: var(--accent);
+}
+
+.char-counter {
+  display: block;
+  text-align: right;
+  font-size: 0.76rem;
+  color: var(--muted);
+  margin-top: 3px;
+}
+
+.chip-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface-soft);
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  margin: 0;
+}
+
+.chip-check input {
+  accent-color: var(--accent);
+}
+
+.toggle-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  margin: 0;
+}
+
+.toggle-row input {
+  accent-color: var(--accent);
+}
+
+.preset-box {
+  background: var(--surface-soft);
+  border: 1px dashed #cfc5b4;
+  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 14px;
+}
+
+.helper-text {
+  margin: 6px 0 0;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+/* Song Input Rows */
+.song-form-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.song-row-card {
+  border: 1px solid var(--line);
+  background: var(--surface-soft);
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+
+.song-row-title {
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 6px;
+}
+
+.song-row-inputs {
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  gap: 8px;
+}
+
+@media (max-width: 420px) {
+  .song-row-inputs {
+    grid-template-columns: 1fr;
+  }
+}
+
+.extra-group-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--gold);
+  margin: 12px 0 8px;
+}
+
+.extra-group-title:first-child {
+  margin-top: 0;
+}
+
+/* Buttons */
+.form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.btn {
+  border: 1px solid transparent;
+  border-radius: 10px;
+  padding: 11px 16px;
+  font-family: inherit;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-sm {
+  padding: 7px 12px;
+  font-size: 0.82rem;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+  flex: 1 1 180px;
+}
+
+.btn-primary:hover {
+  background: var(--accent-hover);
+}
+
+.btn-secondary {
+  background: #fff;
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.btn-secondary:hover {
+  background: var(--accent-soft);
+}
+
+.btn-ghost {
+  background: transparent;
+  border-color: var(--line);
+  color: var(--muted);
+}
+
+.btn-ghost:hover {
+  background: var(--surface);
+  color: var(--ink);
+}
+
+/* Print Preview Sheet */
+.preview-panel {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 16px;
+  box-shadow: var(--shadow);
+}
+
+.print-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.preview-label {
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+
+.print-sheet {
+  background: #fff;
+  color: #111;
+  border: 1px solid #d4d4d4;
+  padding: 16px 18px;
+  border-radius: 6px;
+}
+
+.sheet-header {
+  border-bottom: 2px solid #111;
+  padding-bottom: 8px;
+  margin-bottom: 10px;
+  font-size: 0.92rem;
+}
+
+.sheet-row {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.sheet-meta {
+  font-size: 0.84rem;
+  color: #333;
+}
+
+.sheet-tipe {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #333;
+  margin-top: 2px;
+}
+
+.liturgy-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.86rem;
+}
+
+.liturgy-table th,
+.liturgy-table td {
+  border: 1px solid #333;
+  padding: 5px 8px;
+  text-align: left;
+  vertical-align: middle;
+}
+
+.liturgy-table th {
+  background: #f2f2f2;
+  font-weight: 700;
+}
+
+.col-bagian {
+  width: 34%;
+}
+
+.col-nomor {
+  width: 22%;
+}
+
+.col-judul {
+  width: 44%;
+}
+
+.row-section td {
+  background: #f8f8f8;
+  font-weight: 700;
+  font-size: 0.8rem;
+  letter-spacing: 0.02em;
+}
+
+/* History View */
+.history-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 18px;
+  box-shadow: var(--shadow);
+}
+
+.history-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.history-header h2 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.muted {
+  color: var(--muted);
+  font-size: 0.88rem;
+  margin: 4px 0 0;
+}
+
+.history-filter {
+  margin-bottom: 14px;
+}
+
+.history-list {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+@media (min-width: 720px) {
+  .history-list {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.history-item {
+  border: 1px solid var(--line);
+  background: var(--surface-soft);
+  border-radius: 10px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.history-item-title {
+  font-weight: 700;
+  font-size: 0.96rem;
+  color: var(--ink);
+}
+
+.history-item-sub {
+  font-size: 0.82rem;
+  color: var(--muted);
+  margin-top: 3px;
+}
+
+.history-item-actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* PRINT STYLES */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 10mm;
+  }
+
+  body {
+    background: #fff !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .app-shell {
+    max-width: 100%;
+    padding: 0;
+    margin: 0;
+  }
+
+  #formView.active {
+    display: block;
+  }
+
+  .preview-panel {
+    border: 0;
+    box-shadow: none;
+    padding: 0;
+  }
+
+  .print-sheet {
+    border: 0;
+    padding: 0;
+    border-radius: 0;
+  }
+
+  .liturgy-table {
+    font-size: 8.8pt;
+  }
+
+  .liturgy-table th,
+  .liturgy-table td {
+    padding: 3.5px 6px;
+  }
+}
