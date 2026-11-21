@@ -1,7 +1,5 @@
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxyasTOdbt9uYlbgZizzJ0IqaOYc6TToyBmmD8HTGMs4lRVgKwTZDhLn3Do4mHH44yH7A/exec';
-
 const ORDINARIUM_KEYS = ['tuhan', 'kemuliaan', 'kudus', 'ada'];
-
 const ORDINARIUM_PRESETS = {
   'Misa Kita 2': {
     tuhan: { no: '', judul: 'Misa Kita 2' },
@@ -85,6 +83,8 @@ const EXTRA_GROUPS = {
     ]
   }
 };
+
+const OPTIONAL_SONG_KEYS = new Set(['persembahan2', 'komuni2', 'komuni3']);
 
 let historyCache = [];
 
@@ -174,7 +174,6 @@ function bindEvents() {
       el.addEventListener('change', syncSpecialStatesAndRender);
     });
 
-  // Auto-fill Jumat Pertama saat dicentang jika masih kosong
   document.getElementById('tipeJumatPertama').addEventListener('change', (e) => {
     if (e.target.checked) {
       const jp1No = document.getElementById('no_jp1');
@@ -190,7 +189,6 @@ function bindEvents() {
     renderPrintPreview();
   });
 
-  // Auto-centang Misa Jam 11.00 jika user mengetik "11.00" atau "11:00"
   document.getElementById('jamMisa').addEventListener('input', (e) => {
     const val = e.target.value.trim();
     if (val.includes('11.00') || val.includes('11:00')) {
@@ -199,7 +197,6 @@ function bindEvents() {
     renderPrintPreview();
   });
 
-  // Preset Ordinarium
   document.getElementById('ordinariumPreset').addEventListener('change', (e) => {
     const presetName = e.target.value;
     const preset = ORDINARIUM_PRESETS[presetName];
@@ -246,23 +243,21 @@ function renderPrintPreview() {
   const tanggal = document.getElementById('tanggalMisa').value;
   const jamMisa = document.getElementById('jamMisa').value.trim();
   const tanpaKemuliaan = document.getElementById('tanpaKemuliaan').checked;
-  const activeTipes = getActiveTipes();
 
   document.getElementById('outPaduanSuara').textContent = paduanSuara;
   document.getElementById('outTahun').textContent = tahun;
   document.getElementById('outHariMinggu').textContent = hariMinggu || '-';
 
   const metaParts = [];
-  if (tanggal) metaParts.push(formatTanggalIndo(tanggal));
+  if (tanggal) metaParts.push(formatTanggalDDMMMYYYY(tanggal));
   if (jamMisa) metaParts.push(`Pkl. ${jamMisa}`);
   document.getElementById('outJadwalMeta').textContent = metaParts.join(' • ');
 
-  document.getElementById('outTipeBadge').textContent =
-    activeTipes.length ? `Tipe: ${activeTipes.join(', ')}` : '';
+  // Tidak menampilkan label "Tipe: Misa Biasa"
+  document.getElementById('outTipeBadge').textContent = '';
 
   const rows = [];
 
-  // Baris utama sesuai urutan yang diharapkan
   const pushSongRow = (label, key, isEmptyMarker = false) => {
     if (isEmptyMarker) {
       rows.push(`<tr><td>${escapeHtml(label)}</td><td></td><td></td></tr>`);
@@ -270,6 +265,12 @@ function renderPrintPreview() {
     }
     const no = document.getElementById(`no_${key}`)?.value.trim() || '';
     const judul = document.getElementById(`judul_${key}`)?.value.trim() || '';
+
+    // Lewati baris persembahan pilihan & komuni pilihan jika nomor dan judul kosong
+    if (OPTIONAL_SONG_KEYS.has(key) && !no && !judul) {
+      return;
+    }
+
     rows.push(`
       <tr>
         <td>${escapeHtml(label)}</td>
@@ -302,7 +303,6 @@ function renderPrintPreview() {
   pushSongRow('Penutup', 'penutup');
   pushSongRow('LaguTambahan', 'tambahan');
 
-  // Kombinasi tambahan sesuai tipe misa
   if (document.getElementById('tipeJumatPertama').checked) {
     EXTRA_GROUPS.jumatPertama.items.forEach(item => pushSongRow(item.label, item.key));
   }
@@ -402,7 +402,7 @@ async function handleSave(e) {
     }
 
     document.getElementById('recordId').value = json.id;
-    historyCache = []; // paksa muat ulang riwayat
+    historyCache = [];
     showBanner('success', `Data tersimpan (ID: ${json.id}). Anda bisa langsung mencetak atau mengeditnya nanti.`);
   } catch (err) {
     showBanner('error', `Gagal menyimpan ke Google Sheet: ${err.message}`);
@@ -454,7 +454,7 @@ function renderHistoryList() {
         <div class="history-item-title">${escapeHtml(item.hari_minggu || '(Tanpa Judul Hari Minggu)')} — Tahun ${escapeHtml(item.tahun || 'A')}</div>
         <div class="history-item-sub">
           ${escapeHtml(item.paduan_suara || '')}
-          ${item.tanggal ? ` • ${escapeHtml(formatTanggalIndo(item.tanggal))}` : ''}
+          ${item.tanggal ? ` • ${escapeHtml(formatTanggalDDMMMYYYY(item.tanggal))}` : ''}
           ${item.jam_misa ? ` • Pkl. ${escapeHtml(item.jam_misa)}` : ''}
         </div>
         ${item.tipe_misa ? `<div class="history-item-sub">Tipe: ${escapeHtml(item.tipe_misa)}</div>` : ''}
@@ -526,7 +526,6 @@ window.editRecord = function (id) {
     });
   });
 
-  // Pindah ke tab form
   document.querySelector('.tab-btn[data-view="formView"]').click();
   syncSpecialStatesAndRender();
   showBanner('info', `Memuat data "${item.hari_minggu || item.id}" untuk diedit.`);
@@ -561,10 +560,15 @@ function setVal(id, v) {
   if (el) el.value = v || '';
 }
 
-function formatTanggalIndo(isoStr) {
+function formatTanggalDDMMMYYYY(isoStr) {
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
   const parts = isoStr.split('-');
   if (parts.length !== 3) return isoStr;
-  return `${parts[2]}/${parts[1]}/${parts[0]}`;
+  const year = parts[0];
+  const monthIdx = parseInt(parts[1], 10) - 1;
+  const day = parts[2].padStart(2, '0');
+  const mon = months[monthIdx] || parts[1];
+  return `${day}-${mon}-${year}`;
 }
 
 function escapeHtml(str) {
