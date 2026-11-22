@@ -644,117 +644,6 @@ function buildShareCaption() {
   return parts.join('\n');
 }
 
-function renderSheetToPngBlob() {
-  return new Promise((resolve, reject) => {
-    const paduanSuara = document.getElementById('paduanSuara').value;
-    const tahun = document.getElementById('tahunLiturgis').value;
-    const hariMinggu = document.getElementById('hariMinggu').value.trim() || '-';
-    const tanggal = document.getElementById('tanggalMisa').value;
-    const jamMisa = document.getElementById('jamMisa').value.trim();
-
-    const tableRows = Array.from(document.querySelectorAll('#printTableBody tr')).map(tr => {
-      const tds = tr.querySelectorAll('td');
-      return {
-        lagu: tds[0]?.textContent || '',
-        nomor: tds[1]?.textContent || '',
-        judul: tds[2]?.textContent || ''
-      };
-    });
-
-    const scale = 2; // Resolusi tajam untuk layar HP
-    const width = 780;
-    const padX = 28;
-    const rowHeight = 28;
-    const headerHeight = 96;
-    const tableHeadHeight = 32;
-    const bottomPad = 28;
-    const height = headerHeight + tableHeadHeight + (tableRows.length * rowHeight) + bottomPad;
-
-    const canvas = document.createElement('canvas');
-    canvas.width = width * scale;
-    canvas.height = height * scale;
-
-    const ctx = canvas.getContext('2d');
-    ctx.scale(scale, scale);
-
-    // Latar putih bersih
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0, 0, width, height);
-
-    // Header
-    ctx.fillStyle = '#111111';
-    ctx.font = 'bold 15px "Plus Jakarta Sans", Arial, sans-serif';
-    ctx.fillText(`Paduan Suara: ${paduanSuara}`, padX, 30);
-
-    ctx.textAlign = 'right';
-    ctx.fillText(`Tahun: ${tahun}`, width - padX, 30);
-    ctx.textAlign = 'left';
-
-    ctx.font = '600 14px "Plus Jakarta Sans", Arial, sans-serif';
-    ctx.fillText(`Hari Minggu : ${hariMinggu}`, padX, 54);
-
-    const metaParts = [];
-    if (tanggal) metaParts.push(formatTanggalDDMMMYYYY(tanggal));
-    if (jamMisa) metaParts.push(`Pkl. ${jamMisa}`);
-    if (metaParts.length) {
-      ctx.textAlign = 'right';
-      ctx.font = '13px "Plus Jakarta Sans", Arial, sans-serif';
-      ctx.fillText(metaParts.join(' • '), width - padX, 54);
-      ctx.textAlign = 'left';
-    }
-
-    // Garis pemisah header
-    ctx.strokeStyle = '#111111';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(padX, 68);
-    ctx.lineTo(width - padX, 68);
-    ctx.stroke();
-
-    // Tabel
-    const tableLeft = padX;
-    const tableWidth = width - (padX * 2);
-    const col1W = Math.round(tableWidth * 0.34);
-    const col2W = Math.round(tableWidth * 0.20);
-    const col3W = tableWidth - col1W - col2W;
-    const tableTop = headerHeight - 14;
-
-    // Header kolom tabel
-    ctx.fillStyle = '#f2f2f2';
-    ctx.fillRect(tableLeft, tableTop, tableWidth, tableHeadHeight);
-
-    ctx.strokeStyle = '#333333';
-    ctx.lineWidth = 1;
-    ctx.strokeRect(tableLeft, tableTop, tableWidth, tableHeadHeight);
-
-    ctx.fillStyle = '#111111';
-    ctx.font = 'bold 13px "Plus Jakarta Sans", Arial, sans-serif';
-    ctx.fillText('Lagu', tableLeft + 8, tableTop + 21);
-    ctx.fillText('Nomor', tableLeft + col1W + 8, tableTop + 21);
-    ctx.fillText('Judul', tableLeft + col1W + col2W + 8, tableTop + 21);
-
-    // Baris data
-    ctx.font = '13px "Plus Jakarta Sans", Arial, sans-serif';
-    tableRows.forEach((r, idx) => {
-      const y = tableTop + tableHeadHeight + (idx * rowHeight);
-      ctx.strokeStyle = '#333333';
-      ctx.strokeRect(tableLeft, y, col1W, rowHeight);
-      ctx.strokeRect(tableLeft + col1W, y, col2W, rowHeight);
-      ctx.strokeRect(tableLeft + col1W + col2W, y, col3W, rowHeight);
-
-      ctx.fillStyle = '#111111';
-      ctx.fillText(fitText(ctx, r.lagu, col1W - 16), tableLeft + 8, y + 18);
-      ctx.fillText(fitText(ctx, r.nomor, col2W - 16), tableLeft + col1W + 8, y + 18);
-      ctx.fillText(fitText(ctx, r.judul, col3W - 16), tableLeft + col1W + col2W + 8, y + 18);
-    });
-
-    canvas.toBlob(blob => {
-      if (blob) resolve(blob);
-      else reject(new Error('Konversi gambar gagal'));
-    }, 'image/png');
-  });
-}
-
 function fitText(ctx, text, maxWidth) {
   const str = String(text || '');
   if (!str || ctx.measureText(str).width <= maxWidth) return str;
@@ -784,14 +673,14 @@ function renderSheetToPngBlob() {
 
     const scale = 2;
     const width = 800;
-    const framePad = 26;
+    const outerMargin = 24;
     const innerPadX = 24;
     const rowHeight = 28;
     const headerTop = 44;
-    const headerBottom = 94;
+    const headerBottom = 92;
     const tableHeadHeight = 32;
-    const tableTop = headerBottom + 10;
-    const bottomSpace = 44;
+    const tableTop = headerBottom + 12;
+    const bottomSpace = 40;
     const height = tableTop + tableHeadHeight + (tableRows.length * rowHeight) + bottomSpace;
 
     const canvas = document.createElement('canvas');
@@ -801,20 +690,27 @@ function renderSheetToPngBlob() {
     const ctx = canvas.getContext('2d');
     ctx.scale(scale, scale);
 
-    // Latar kertas hangat
-    ctx.fillStyle = '#fdfbf7';
+    // Crisp white background
+    ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, 0, width, height);
 
-    // Frame Etnik (bingkai luar burgundy + bingkai dalam emas + motif tumpal/wajik di sudut & sisi)
-    drawEthnicFrame(ctx, width, height, framePad);
+    // Office-standard clean rectangular border
+    ctx.strokeStyle = '#cbd5e1';
+    ctx.lineWidth = 1.5;
+    ctx.strokeRect(
+      outerMargin,
+      outerMargin,
+      width - outerMargin * 2,
+      height - outerMargin * 2
+    );
 
-    const contentLeft = framePad + innerPadX;
-    const contentRight = width - framePad - innerPadX;
+    const contentLeft = outerMargin + innerPadX;
+    const contentRight = width - outerMargin - innerPadX;
     const contentWidth = contentRight - contentLeft;
 
-    // Header informasi
-    ctx.fillStyle = '#1f2421';
-    ctx.font = 'bold 15px "Plus Jakarta Sans", Arial, sans-serif';
+    // Header info
+    ctx.fillStyle = '#0f172a';
+    ctx.font = 'bold 14.5px "Plus Jakarta Sans", Arial, sans-serif';
     ctx.textAlign = 'left';
     ctx.fillText(`Paduan Suara: ${paduanSuara}`, contentLeft, headerTop + 14);
 
@@ -822,57 +718,61 @@ function renderSheetToPngBlob() {
     ctx.fillText(`Tahun: ${tahun}`, contentRight, headerTop + 14);
 
     ctx.textAlign = 'left';
-    ctx.font = '600 14px "Plus Jakarta Sans", Arial, sans-serif';
-    ctx.fillText(`Hari Minggu : ${hariMinggu}`, contentLeft, headerTop + 38);
+    ctx.font = '600 13.5px "Plus Jakarta Sans", Arial, sans-serif';
+    ctx.fillStyle = '#1e293b';
+    ctx.fillText(`Hari Minggu : ${hariMinggu}`, contentLeft, headerTop + 36);
 
     const metaParts = [];
     if (tanggal) metaParts.push(formatTanggalDDMMMYYYY(tanggal));
     if (jamMisa) metaParts.push(`Pkl. ${jamMisa}`);
     if (metaParts.length) {
       ctx.textAlign = 'right';
-      ctx.font = '13px "Plus Jakarta Sans", Arial, sans-serif';
-      ctx.fillText(metaParts.join(' • '), contentRight, headerTop + 38);
+      ctx.font = '12.5px "Plus Jakarta Sans", Arial, sans-serif';
+      ctx.fillStyle = '#475569';
+      ctx.fillText(metaParts.join(' • '), contentRight, headerTop + 36);
     }
 
-    // Garis pemisah header dengan aksen emas & burgundy
+    // Clean divider rule under header
     ctx.textAlign = 'left';
-    ctx.strokeStyle = '#5a2b36';
-    ctx.lineWidth = 2;
+    ctx.strokeStyle = '#334155';
+    ctx.lineWidth = 1.5;
     ctx.beginPath();
     ctx.moveTo(contentLeft, headerBottom);
     ctx.lineTo(contentRight, headerBottom);
     ctx.stroke();
 
-    // Tabel
+    // Table columns
     const col1W = Math.round(contentWidth * 0.34);
     const col2W = Math.round(contentWidth * 0.20);
     const col3W = contentWidth - col1W - col2W;
 
-    ctx.fillStyle = '#f3ece4';
+    // Table header
+    ctx.fillStyle = '#f1f5f9';
     ctx.fillRect(contentLeft, tableTop, contentWidth, tableHeadHeight);
 
-    ctx.strokeStyle = '#3b2d2b';
+    ctx.strokeStyle = '#64748b';
     ctx.lineWidth = 1;
     ctx.strokeRect(contentLeft, tableTop, contentWidth, tableHeadHeight);
 
-    ctx.fillStyle = '#1f2421';
-    ctx.font = 'bold 13px "Plus Jakarta Sans", Arial, sans-serif';
-    ctx.fillText('Lagu', contentLeft + 8, tableTop + 21);
-    ctx.fillText('Nomor', contentLeft + col1W + 8, tableTop + 21);
-    ctx.fillText('Judul', contentLeft + col1W + col2W + 8, tableTop + 21);
+    ctx.fillStyle = '#0f172a';
+    ctx.font = 'bold 12.5px "Plus Jakarta Sans", Arial, sans-serif';
+    ctx.fillText('Lagu', contentLeft + 8, tableTop + 20);
+    ctx.fillText('Nomor', contentLeft + col1W + 8, tableTop + 20);
+    ctx.fillText('Judul', contentLeft + col1W + col2W + 8, tableTop + 20);
 
-    ctx.font = '13px "Plus Jakarta Sans", Arial, sans-serif';
+    // Table rows
+    ctx.font = '12.5px "Plus Jakarta Sans", Arial, sans-serif';
     tableRows.forEach((r, idx) => {
       const y = tableTop + tableHeadHeight + (idx * rowHeight);
-      ctx.fillStyle = idx % 2 === 1 ? '#faf7f2' : '#ffffff';
+      ctx.fillStyle = idx % 2 === 1 ? '#f8fafc' : '#ffffff';
       ctx.fillRect(contentLeft, y, contentWidth, rowHeight);
 
-      ctx.strokeStyle = '#3b2d2b';
+      ctx.strokeStyle = '#94a3b8';
       ctx.strokeRect(contentLeft, y, col1W, rowHeight);
       ctx.strokeRect(contentLeft + col1W, y, col2W, rowHeight);
       ctx.strokeRect(contentLeft + col1W + col2W, y, col3W, rowHeight);
 
-      ctx.fillStyle = '#1f2421';
+      ctx.fillStyle = '#1e293b';
       ctx.fillText(fitText(ctx, r.lagu, col1W - 16), contentLeft + 8, y + 18);
       ctx.fillText(fitText(ctx, r.nomor, col2W - 16), contentLeft + col1W + 8, y + 18);
       ctx.fillText(fitText(ctx, r.judul, col3W - 16), contentLeft + col1W + col2W + 8, y + 18);
