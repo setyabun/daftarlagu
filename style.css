@@ -648,3 +648,39 @@ select:focus {
     padding: 3.5px 6px;
   }
 }
+.guide-callout {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--accent);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  margin-bottom: 12px;
+  box-shadow: var(--shadow);
+  font-size: 0.88rem;
+  color: var(--ink);
+}
+
+.guide-callout p {
+  margin: 0;
+}
+
+.guide-greeting {
+  margin-top: 6px !important;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.form-actions .btn {
+  white-space: nowrap;
+}
+
+@media (max-width: 520px) {
+  .form-actions .btn {
+    flex: 1 1 calc(50% - 5px);
+    text-align: center;
+  }
+
+  .form-actions .btn-primary {
+    flex: 1 1 100%;
+  }
+}

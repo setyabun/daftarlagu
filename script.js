@@ -72,7 +72,7 @@ const EXTRA_GROUPS = {
     items: [
       { key: 'ros_buka', label: 'Lagu Pembukaan Rosario', defaultNo: '', defaultJudul: '' },
       { key: 'ros_ave2', label: 'Lagu Ave2', defaultNo: '', defaultJudul: 'Ave-Ave' },
-      { key: 'ros_tutup', label: 'Lagu Pnutupan Rosario', defaultNo: '', defaultJudul: '' }
+      { key: 'ros_tutup', label: 'Lagu Penutupan Rosario', defaultNo: '', defaultJudul: '' }
     ]
   },
   jam11: {
@@ -763,4 +763,188 @@ function fitText(ctx, text, maxWidth) {
     cut = cut.slice(0, -1);
   }
   return `${cut}…`;
+}
+
+function renderSheetToPngBlob() {
+  return new Promise((resolve, reject) => {
+    const paduanSuara = document.getElementById('paduanSuara').value;
+    const tahun = document.getElementById('tahunLiturgis').value;
+    const hariMinggu = document.getElementById('hariMinggu').value.trim() || '-';
+    const tanggal = document.getElementById('tanggalMisa').value;
+    const jamMisa = document.getElementById('jamMisa').value.trim();
+
+    const tableRows = Array.from(document.querySelectorAll('#printTableBody tr')).map(tr => {
+      const tds = tr.querySelectorAll('td');
+      return {
+        lagu: tds[0]?.textContent || '',
+        nomor: tds[1]?.textContent || '',
+        judul: tds[2]?.textContent || ''
+      };
+    });
+
+    const scale = 2;
+    const width = 800;
+    const framePad = 26;
+    const innerPadX = 24;
+    const rowHeight = 28;
+    const headerTop = 44;
+    const headerBottom = 94;
+    const tableHeadHeight = 32;
+    const tableTop = headerBottom + 10;
+    const bottomSpace = 44;
+    const height = tableTop + tableHeadHeight + (tableRows.length * rowHeight) + bottomSpace;
+
+    const canvas = document.createElement('canvas');
+    canvas.width = width * scale;
+    canvas.height = height * scale;
+
+    const ctx = canvas.getContext('2d');
+    ctx.scale(scale, scale);
+
+    // Latar kertas hangat
+    ctx.fillStyle = '#fdfbf7';
+    ctx.fillRect(0, 0, width, height);
+
+    // Frame Etnik (bingkai luar burgundy + bingkai dalam emas + motif tumpal/wajik di sudut & sisi)
+    drawEthnicFrame(ctx, width, height, framePad);
+
+    const contentLeft = framePad + innerPadX;
+    const contentRight = width - framePad - innerPadX;
+    const contentWidth = contentRight - contentLeft;
+
+    // Header informasi
+    ctx.fillStyle = '#1f2421';
+    ctx.font = 'bold 15px "Plus Jakarta Sans", Arial, sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText(`Paduan Suara: ${paduanSuara}`, contentLeft, headerTop + 14);
+
+    ctx.textAlign = 'right';
+    ctx.fillText(`Tahun: ${tahun}`, contentRight, headerTop + 14);
+
+    ctx.textAlign = 'left';
+    ctx.font = '600 14px "Plus Jakarta Sans", Arial, sans-serif';
+    ctx.fillText(`Hari Minggu : ${hariMinggu}`, contentLeft, headerTop + 38);
+
+    const metaParts = [];
+    if (tanggal) metaParts.push(formatTanggalDDMMMYYYY(tanggal));
+    if (jamMisa) metaParts.push(`Pkl. ${jamMisa}`);
+    if (metaParts.length) {
+      ctx.textAlign = 'right';
+      ctx.font = '13px "Plus Jakarta Sans", Arial, sans-serif';
+      ctx.fillText(metaParts.join(' • '), contentRight, headerTop + 38);
+    }
+
+    // Garis pemisah header dengan aksen emas & burgundy
+    ctx.textAlign = 'left';
+    ctx.strokeStyle = '#5a2b36';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(contentLeft, headerBottom);
+    ctx.lineTo(contentRight, headerBottom);
+    ctx.stroke();
+
+    // Tabel
+    const col1W = Math.round(contentWidth * 0.34);
+    const col2W = Math.round(contentWidth * 0.20);
+    const col3W = contentWidth - col1W - col2W;
+
+    ctx.fillStyle = '#f3ece4';
+    ctx.fillRect(contentLeft, tableTop, contentWidth, tableHeadHeight);
+
+    ctx.strokeStyle = '#3b2d2b';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(contentLeft, tableTop, contentWidth, tableHeadHeight);
+
+    ctx.fillStyle = '#1f2421';
+    ctx.font = 'bold 13px "Plus Jakarta Sans", Arial, sans-serif';
+    ctx.fillText('Lagu', contentLeft + 8, tableTop + 21);
+    ctx.fillText('Nomor', contentLeft + col1W + 8, tableTop + 21);
+    ctx.fillText('Judul', contentLeft + col1W + col2W + 8, tableTop + 21);
+
+    ctx.font = '13px "Plus Jakarta Sans", Arial, sans-serif';
+    tableRows.forEach((r, idx) => {
+      const y = tableTop + tableHeadHeight + (idx * rowHeight);
+      ctx.fillStyle = idx % 2 === 1 ? '#faf7f2' : '#ffffff';
+      ctx.fillRect(contentLeft, y, contentWidth, rowHeight);
+
+      ctx.strokeStyle = '#3b2d2b';
+      ctx.strokeRect(contentLeft, y, col1W, rowHeight);
+      ctx.strokeRect(contentLeft + col1W, y, col2W, rowHeight);
+      ctx.strokeRect(contentLeft + col1W + col2W, y, col3W, rowHeight);
+
+      ctx.fillStyle = '#1f2421';
+      ctx.fillText(fitText(ctx, r.lagu, col1W - 16), contentLeft + 8, y + 18);
+      ctx.fillText(fitText(ctx, r.nomor, col2W - 16), contentLeft + col1W + 8, y + 18);
+      ctx.fillText(fitText(ctx, r.judul, col3W - 16), contentLeft + col1W + col2W + 8, y + 18);
+    });
+
+    canvas.toBlob(blob => {
+      if (blob) resolve(blob);
+      else reject(new Error('Konversi gambar gagal'));
+    }, 'image/png');
+  });
+}
+
+function drawEthnicFrame(ctx, width, height, pad) {
+  const outerX = pad;
+  const outerY = pad;
+  const outerW = width - pad * 2;
+  const outerH = height - pad * 2;
+
+  const innerX = pad + 8;
+  const innerY = pad + 8;
+  const innerW = width - (pad + 8) * 2;
+  const innerH = height - (pad + 8) * 2;
+
+  // Bingkai luar burgundy
+  ctx.strokeStyle = '#5a2b36';
+  ctx.lineWidth = 2.5;
+  ctx.strokeRect(outerX, outerY, outerW, outerH);
+
+  // Bingkai dalam emas etnik
+  ctx.strokeStyle = '#9c732b';
+  ctx.lineWidth = 1.25;
+  ctx.strokeRect(innerX, innerY, innerW, innerH);
+
+  // Motif wajik (belah ketupat) berulang di sepanjang garis tengah bingkai
+  const step = 22;
+  const midOffset = 4;
+  const drawDiamond = (cx, cy, r, fill) => {
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(Math.PI / 4);
+    ctx.fillStyle = fill;
+    ctx.fillRect(-r, -r, r * 2, r * 2);
+    ctx.restore();
+  };
+
+  for (let x = outerX + 16; x <= outerX + outerW - 16; x += step) {
+    drawDiamond(x, outerY + midOffset, 3.2, '#9c732b');
+    drawDiamond(x, outerY + outerH - midOffset, 3.2, '#9c732b');
+  }
+
+  for (let y = outerY + 16; y <= outerY + outerH - 16; y += step) {
+    drawDiamond(outerX + midOffset, y, 3.2, '#9c732b');
+    drawDiamond(outerX + outerW - midOffset, y, 3.2, '#9c732b');
+  }
+
+  // Medali sudut etnik
+  const corners = [
+    [outerX, outerY],
+    [outerX + outerW, outerY],
+    [outerX, outerY + outerH],
+    [outerX + outerW, outerY + outerH]
+  ];
+
+  corners.forEach(([cx, cy]) => {
+    ctx.fillStyle = '#fdfbf7';
+    ctx.strokeStyle = '#5a2b36';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(cx, cy, 9, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+
+    drawDiamond(cx, cy, 3.8, '#9c732b');
+  });
 }

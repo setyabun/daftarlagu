@@ -35,10 +35,16 @@
         <form id="misaForm" autocomplete="off">
           <input type="hidden" id="recordId" value="" />
 
-          <!-- Accordion 1: Identitas & Tipe Misa -->
-          <div class="accordion open">
-            <button type="button" class="accordion-trigger" aria-expanded="true">
-              <span>1. Identitas Jadwal &amp; Tipe Misa</span>
+		  <!-- Kotak Panduan di atas Bagian 1 -->
+          <div class="guide-callout">
+            <p>Untuk Pengisian Lagu, ada 3 bagian yang harus di isi, klik panah kecil di ujung tiap bagian untuk membuka/ menutupnya.</p><b>Simpan ke Google Sheet</b>, untuk dapat diambil kemudian hari, <b>Share Gambar</b> untuk membagikan list lagu. <p>Lihat Preview di bagian bawah, jika masih salah dapat diperbaiki dahulu dibagiannya.
+            <p class="guide-greeting">Selamat Melayani !</p>
+          </div>
+		  
+		  <!-- Accordion 1: Paduan Suara, Tgl & Jam, Jenis Misa -->
+          <div class="accordion">
+            <button type="button" class="accordion-trigger" aria-expanded="false">
+              <span>1. Paduan Suara, Tgl &amp; Jam, Jenis Misa</span>
               <span class="chevron">▾</span>
             </button>
             <div class="accordion-body">
@@ -80,7 +86,7 @@
               </div>
 
               <div class="field">
-                <span class="field-label">Tipe Misa (boleh lebih dari satu)</span>
+                <span class="field-label">jenis Misa (boleh pilih lebih dari satu)</span>
                 <div class="chip-group">
                   <label class="chip-check">
                     <input type="checkbox" id="tipeBiasa" checked />
@@ -111,8 +117,8 @@
           </div>
 
           <!-- Accordion 2: Preset Ordinarium & Lagu Utama -->
-          <div class="accordion open">
-            <button type="button" class="accordion-trigger" aria-expanded="true">
+          <div class="accordion">
+            <button type="button" class="accordion-trigger" aria-expanded="false">
               <span>2. Ordinarium &amp; Lagu Liturgi Utama</span>
               <span class="chevron">▾</span>
             </button>
