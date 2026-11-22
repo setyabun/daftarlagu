@@ -1,29 +1,31 @@
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxyasTOdbt9uYlbgZizzJ0IqaOYc6TToyBmmD8HTGMs4lRVgKwTZDhLn3Do4mHH44yH7A/exec';
+
 const ORDINARIUM_KEYS = ['tuhan', 'kemuliaan', 'kudus', 'ada'];
+
 const ORDINARIUM_PRESETS = {
   'Misa Kita 2': {
-    tuhan: { no: '', judul: 'Misa Kita 2' },
-    kemuliaan: { no: '', judul: 'Misa Kita 2' },
-    kudus: { no: '', judul: 'Misa Kita 2' },
-    ada: { no: '', judul: 'Misa Kita 2' }
+    tuhan: { no: 'PS 351', judul: 'Misa Kita 2' },
+    kemuliaan: { no: 'PS 352', judul: 'Misa Kita 2' },
+    kudus: { no: 'PS 392', judul: 'Misa Kita 2' },
+    ada: { no: 'PS 413', judul: 'Misa Kita 2' }
   },
-  'Misa Kita 1': {
-    tuhan: { no: '', judul: 'Misa Kita 1' },
-    kemuliaan: { no: '', judul: 'Misa Kita 1' },
-    kudus: { no: '', judul: 'Misa Kita 1' },
-    ada: { no: '', judul: 'Misa Kita 1' }
+  'Misa Gregorian': {
+    tuhan: { no: '', judul: 'Kyrie' },
+    kemuliaan: { no: '', judul: 'Gloria' },
+    kudus: { no: '', judul: 'Sanctus' },
+    ada: { no: '', judul: 'Agnus Dei' }
   },
-  'Misa Kita 3': {
-    tuhan: { no: '', judul: 'Misa Kita 3' },
-    kemuliaan: { no: '', judul: 'Misa Kita 3' },
-    kudus: { no: '', judul: 'Misa Kita 3' },
-    ada: { no: '', judul: 'Misa Kita 3' }
+  'Misa Lauda Sion': {
+    tuhan: { no: 'PS 347', judul: 'Misa Lauda Sion' },
+    kemuliaan: { no: 'PS 348', judul: 'Misa Lauda Sion' },
+    kudus: { no: 'PS 390', judul: 'Misa Lauda Sion' },
+    ada: { no: 'PS 411', judul: 'Misa Lauda Sion' }
   },
   'Misa Kita 4': {
-    tuhan: { no: '', judul: 'Misa Kita 4' },
-    kemuliaan: { no: '', judul: 'Misa Kita 4' },
-    kudus: { no: '', judul: 'Misa Kita 4' },
-    ada: { no: '', judul: 'Misa Kita 4' }
+    tuhan: { no: 'PS 353', judul: 'Misa Kita 4' },
+    kemuliaan: { no: 'PS 354', judul: 'Misa Kita 4' },
+    kudus: { no: 'PS 393', judul: 'Misa Kita 4' },
+    ada: { no: 'PS 414', judul: 'Misa Kita 4' }
   },
   'Misa Syukur': {
     tuhan: { no: '', judul: 'Misa Syukur' },
@@ -168,11 +170,12 @@ function bindEvents() {
     renderPrintPreview();
   });
 
-  document.querySelectorAll('[data-bind="preview"], #paduanSuara, #tahunLiturgis, #tanggalMisa, #jamMisa, #tanpaKemuliaan')
-    .forEach(el => {
-      el.addEventListener('input', syncSpecialStatesAndRender);
-      el.addEventListener('change', syncSpecialStatesAndRender);
-    });
+  document.querySelectorAll(
+    '[data-bind="preview"], #paduanSuara, #tahunLiturgis, #tanggalMisa, #jamMisa, #tanpaKemuliaan, #tipeBiasa, #tipeRosario, #tipeJam11'
+  ).forEach(el => {
+    el.addEventListener('input', syncSpecialStatesAndRender);
+    el.addEventListener('change', syncSpecialStatesAndRender);
+  });
 
   document.getElementById('tipeJumatPertama').addEventListener('change', (e) => {
     if (e.target.checked) {
@@ -197,25 +200,26 @@ function bindEvents() {
     renderPrintPreview();
   });
 
-  document.getElementById('ordinariumPreset').addEventListener('change', (e) => {
-    const presetName = e.target.value;
-    const preset = ORDINARIUM_PRESETS[presetName];
-    if (!preset) return;
+	document.getElementById('ordinariumPreset').addEventListener('change', (e) => {
+	  const presetName = e.target.value;
+	  const preset = ORDINARIUM_PRESETS[presetName];
+	  if (!preset) return;
 
-    ORDINARIUM_KEYS.forEach(k => {
-      if (preset[k]) {
-        if (preset[k].no) document.getElementById(`no_${k}`).value = preset[k].no;
-        if (preset[k].judul) document.getElementById(`judul_${k}`).value = preset[k].judul;
-      }
-    });
-    renderPrintPreview();
-  });
+	  ORDINARIUM_KEYS.forEach(k => {
+		if (preset[k]) {
+		  document.getElementById(`no_${k}`).value = preset[k].no ?? '';
+		  document.getElementById(`judul_${k}`).value = preset[k].judul ?? '';
+		}
+	  });
+	  renderPrintPreview();
+	});
 
   document.getElementById('misaForm').addEventListener('submit', handleSave);
   document.getElementById('printBtn').addEventListener('click', () => window.print());
   document.getElementById('resetBtn').addEventListener('click', resetForm);
   document.getElementById('refreshHistoryBtn').addEventListener('click', loadHistory);
   document.getElementById('searchHistory').addEventListener('input', renderHistoryList);
+  document.getElementById('shareImgBtn').addEventListener('click', handleShareImage);
 }
 
 function syncSpecialStatesAndRender() {
@@ -253,7 +257,6 @@ function renderPrintPreview() {
   if (jamMisa) metaParts.push(`Pkl. ${jamMisa}`);
   document.getElementById('outJadwalMeta').textContent = metaParts.join(' • ');
 
-  // Tidak menampilkan label "Tipe: Misa Biasa"
   document.getElementById('outTipeBadge').textContent = '';
 
   const rows = [];
@@ -266,7 +269,6 @@ function renderPrintPreview() {
     const no = document.getElementById(`no_${key}`)?.value.trim() || '';
     const judul = document.getElementById(`judul_${key}`)?.value.trim() || '';
 
-    // Lewati baris persembahan pilihan & komuni pilihan jika nomor dan judul kosong
     if (OPTIONAL_SONG_KEYS.has(key) && !no && !judul) {
       return;
     }
@@ -581,4 +583,184 @@ function escapeHtml(str) {
 
 function escapeAttr(str) {
   return escapeHtml(str).replace(/'/g, '&#39;');
+}
+async function handleShareImage() {
+  const shareBtn = document.getElementById('shareImgBtn');
+  shareBtn.disabled = true;
+  shareBtn.textContent = 'Menyiapkan...';
+  showBanner('info', 'Menyiapkan gambar daftar lagu...');
+
+  try {
+    const blob = await renderSheetToPngBlob();
+    const hariMinggu = (document.getElementById('hariMinggu').value.trim() || 'Jadwal-Misa')
+      .replace(/[^a-zA-Z0-9-_]+/g, '-');
+    const fileName = `Lagu-Misa-${hariMinggu}.png`;
+    const file = new File([blob], fileName, { type: 'image/png' });
+
+    const caption = buildShareCaption();
+
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({
+        title: 'Daftar Lagu Misa',
+        text: caption,
+        files: [file]
+      });
+      showBanner('success', 'Menu share siap/terbuka.');
+    } else {
+      // Fallback untuk browser yang belum mendukung share file: unduh PNG
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 2000);
+      showBanner('success', `Gambar "${fileName}" diunduh. Anda bisa melampirkannya ke WhatsApp atau Email.`);
+    }
+  } catch (err) {
+    if (err && err.name === 'AbortError') {
+      showBanner('info', 'Berbagi gambar dibatalkan.');
+    } else {
+      showBanner('error', `Gagal membuat/membagikan gambar: ${err.message}`);
+    }
+  } finally {
+    shareBtn.disabled = false;
+    shareBtn.textContent = 'Share Gambar';
+  }
+}
+
+function buildShareCaption() {
+  const ps = document.getElementById('paduanSuara').value;
+  const tahun = document.getElementById('tahunLiturgis').value;
+  const hari = document.getElementById('hariMinggu').value.trim();
+  const tgl = document.getElementById('tanggalMisa').value;
+  const jam = document.getElementById('jamMisa').value.trim();
+
+  const parts = [`Paduan Suara: ${ps} (Tahun ${tahun})`];
+  if (hari) parts.push(`Hari Minggu: ${hari}`);
+  const waktu = [tgl ? formatTanggalDDMMMYYYY(tgl) : '', jam ? `Pkl. ${jam}` : ''].filter(Boolean).join(' • ');
+  if (waktu) parts.push(waktu);
+  return parts.join('\n');
+}
+
+function renderSheetToPngBlob() {
+  return new Promise((resolve, reject) => {
+    const paduanSuara = document.getElementById('paduanSuara').value;
+    const tahun = document.getElementById('tahunLiturgis').value;
+    const hariMinggu = document.getElementById('hariMinggu').value.trim() || '-';
+    const tanggal = document.getElementById('tanggalMisa').value;
+    const jamMisa = document.getElementById('jamMisa').value.trim();
+
+    const tableRows = Array.from(document.querySelectorAll('#printTableBody tr')).map(tr => {
+      const tds = tr.querySelectorAll('td');
+      return {
+        lagu: tds[0]?.textContent || '',
+        nomor: tds[1]?.textContent || '',
+        judul: tds[2]?.textContent || ''
+      };
+    });
+
+    const scale = 2; // Resolusi tajam untuk layar HP
+    const width = 780;
+    const padX = 28;
+    const rowHeight = 28;
+    const headerHeight = 96;
+    const tableHeadHeight = 32;
+    const bottomPad = 28;
+    const height = headerHeight + tableHeadHeight + (tableRows.length * rowHeight) + bottomPad;
+
+    const canvas = document.createElement('canvas');
+    canvas.width = width * scale;
+    canvas.height = height * scale;
+
+    const ctx = canvas.getContext('2d');
+    ctx.scale(scale, scale);
+
+    // Latar putih bersih
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, width, height);
+
+    // Header
+    ctx.fillStyle = '#111111';
+    ctx.font = 'bold 15px "Plus Jakarta Sans", Arial, sans-serif';
+    ctx.fillText(`Paduan Suara: ${paduanSuara}`, padX, 30);
+
+    ctx.textAlign = 'right';
+    ctx.fillText(`Tahun: ${tahun}`, width - padX, 30);
+    ctx.textAlign = 'left';
+
+    ctx.font = '600 14px "Plus Jakarta Sans", Arial, sans-serif';
+    ctx.fillText(`Hari Minggu : ${hariMinggu}`, padX, 54);
+
+    const metaParts = [];
+    if (tanggal) metaParts.push(formatTanggalDDMMMYYYY(tanggal));
+    if (jamMisa) metaParts.push(`Pkl. ${jamMisa}`);
+    if (metaParts.length) {
+      ctx.textAlign = 'right';
+      ctx.font = '13px "Plus Jakarta Sans", Arial, sans-serif';
+      ctx.fillText(metaParts.join(' • '), width - padX, 54);
+      ctx.textAlign = 'left';
+    }
+
+    // Garis pemisah header
+    ctx.strokeStyle = '#111111';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(padX, 68);
+    ctx.lineTo(width - padX, 68);
+    ctx.stroke();
+
+    // Tabel
+    const tableLeft = padX;
+    const tableWidth = width - (padX * 2);
+    const col1W = Math.round(tableWidth * 0.34);
+    const col2W = Math.round(tableWidth * 0.20);
+    const col3W = tableWidth - col1W - col2W;
+    const tableTop = headerHeight - 14;
+
+    // Header kolom tabel
+    ctx.fillStyle = '#f2f2f2';
+    ctx.fillRect(tableLeft, tableTop, tableWidth, tableHeadHeight);
+
+    ctx.strokeStyle = '#333333';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(tableLeft, tableTop, tableWidth, tableHeadHeight);
+
+    ctx.fillStyle = '#111111';
+    ctx.font = 'bold 13px "Plus Jakarta Sans", Arial, sans-serif';
+    ctx.fillText('Lagu', tableLeft + 8, tableTop + 21);
+    ctx.fillText('Nomor', tableLeft + col1W + 8, tableTop + 21);
+    ctx.fillText('Judul', tableLeft + col1W + col2W + 8, tableTop + 21);
+
+    // Baris data
+    ctx.font = '13px "Plus Jakarta Sans", Arial, sans-serif';
+    tableRows.forEach((r, idx) => {
+      const y = tableTop + tableHeadHeight + (idx * rowHeight);
+      ctx.strokeStyle = '#333333';
+      ctx.strokeRect(tableLeft, y, col1W, rowHeight);
+      ctx.strokeRect(tableLeft + col1W, y, col2W, rowHeight);
+      ctx.strokeRect(tableLeft + col1W + col2W, y, col3W, rowHeight);
+
+      ctx.fillStyle = '#111111';
+      ctx.fillText(fitText(ctx, r.lagu, col1W - 16), tableLeft + 8, y + 18);
+      ctx.fillText(fitText(ctx, r.nomor, col2W - 16), tableLeft + col1W + 8, y + 18);
+      ctx.fillText(fitText(ctx, r.judul, col3W - 16), tableLeft + col1W + col2W + 8, y + 18);
+    });
+
+    canvas.toBlob(blob => {
+      if (blob) resolve(blob);
+      else reject(new Error('Konversi gambar gagal'));
+    }, 'image/png');
+  });
+}
+
+function fitText(ctx, text, maxWidth) {
+  const str = String(text || '');
+  if (!str || ctx.measureText(str).width <= maxWidth) return str;
+  let cut = str;
+  while (cut.length > 1 && ctx.measureText(`${cut}…`).width > maxWidth) {
+    cut = cut.slice(0, -1);
+  }
+  return `${cut}…`;
 }

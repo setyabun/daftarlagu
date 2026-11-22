@@ -368,6 +368,7 @@ select:focus {
   margin-top: 14px;
 }
 
+
 .btn {
   border: 1px solid transparent;
   border-radius: 10px;
@@ -378,6 +379,8 @@ select:focus {
   cursor: pointer;
   transition: all 0.15s ease;
 }
+
+
 
 .btn-sm {
   padding: 7px 12px;
@@ -415,6 +418,20 @@ select:focus {
   color: var(--ink);
 }
 
+.form-actions .btn {
+  white-space: nowrap;
+}
+
+@media (max-width: 520px) {
+  .form-actions .btn {
+    flex: 1 1 calc(50% - 5px);
+    text-align: center;
+  }
+
+  .form-actions .btn-primary {
+    flex: 1 1 100%;
+  }
+}
 /* Print Preview Sheet */
 .preview-panel {
   background: var(--surface);
